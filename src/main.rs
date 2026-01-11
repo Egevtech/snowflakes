@@ -8,6 +8,7 @@ use raylib::prelude::*;
 
 const SPAWN_THREAD_ACTIVITY: u64 = 10; // Период между спавном снежинки
 const GC_THREAD_ACTIVITY: u64 = 10; // Частота работы потока движения и очистки мусора
+const MAX_FPS: u32 = 200; // Максимальное количество FPS
 
 #[derive(Debug, Clone)]
 struct Snowflake {
@@ -97,7 +98,7 @@ async fn main() {
         }
     });
 
-    rl.set_target_fps(200);
+    rl.set_target_fps(MAX_FPS);
 
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
