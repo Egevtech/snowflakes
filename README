@@ -1,0 +1,4 @@
+SNOWFLAKES
+==========
+
+cargo install --git https://github.com/egevtech/snowflakes
