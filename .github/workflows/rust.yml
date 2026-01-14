@@ -15,5 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Dependencies install
+        run: apt-get install libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev gettext
       - name: Build
         run: cargo build
