@@ -14,7 +14,7 @@ const MAX_FPS: u32 = 200; // Максимальное количество FPS
 struct Snowflake {
     position: Vector2,
     velocity: Vector2,
-    radius: f32
+    radius: f32,
 }
 
 impl Snowflake {
@@ -29,22 +29,25 @@ impl Snowflake {
         let vel_x = rng.random_range(-0.5..0.5) as f32;
         let vel_y = radius * rng.random_range(0.8..1.20);
 
-        Snowflake::new(Vector2::new(start_pos_x, start_pos_y), Vector2::new(vel_x, vel_y), radius)
-
+        Snowflake::new(
+            Vector2::new(start_pos_x, start_pos_y),
+            Vector2::new(vel_x, vel_y),
+            radius,
+        )
     }
 
     fn new(start: Vector2, vel: Vector2, rad: f32) -> Snowflake {
         Snowflake {
             position: start,
             velocity: vel,
-            radius: rad
+            radius: rad,
         }
     }
 }
 
 struct Snowflakes {
     pub snowflakes: Vec<Snowflake>,
-    pub screen: Vector2
+    pub screen: Vector2,
 }
 
 #[tokio::main]
@@ -58,7 +61,10 @@ async fn main() {
         .resizable()
         .build();
 
-    let sf_buffer = Arc::new(Mutex::new(Snowflakes{snowflakes: vec![], screen: Vector2::new(width as f32, height as f32)}));
+    let sf_buffer = Arc::new(Mutex::new(Snowflakes {
+        snowflakes: vec![],
+        screen: Vector2::new(width as f32, height as f32),
+    }));
 
     let buffer_clone = Arc::clone(&sf_buffer);
     tokio::task::spawn_blocking(move || {
@@ -75,25 +81,25 @@ async fn main() {
 
     let buffer_clone = Arc::clone(&sf_buffer);
     tokio::spawn(async move {
-
         let mut direct_time = std::time::SystemTime::now();
 
         loop {
             let mut guard = buffer_clone.lock().unwrap();
 
-            if SystemTime::now().duration_since(direct_time).unwrap() > Duration::from_millis(GC_THREAD_ACTIVITY) {
+            if SystemTime::now().duration_since(direct_time).unwrap()
+                > Duration::from_millis(GC_THREAD_ACTIVITY)
+            {
                 direct_time = SystemTime::now();
 
-                guard.snowflakes.iter_mut().for_each(|s| {s.position.y += s.velocity.y; s.position.x += s.velocity.x;});
+                guard.snowflakes.iter_mut().for_each(|s| {
+                    s.position.y += s.velocity.y;
+                    s.position.x += s.velocity.x;
+                });
 
                 let size = guard.screen.clone();
-                let snow_count = guard.snowflakes.len();
-                guard.snowflakes.retain(|s| s.position.x > 0.00 && s.position.x < size.x && s.position.y < size.y);
-                let cleared = snow_count - guard.snowflakes.len();
-
-                if cleared != 0 {
-                    println!("{} snowflakes were removed", cleared);
-                }
+                guard.snowflakes.retain(|s| {
+                    s.position.x > 0.00 && s.position.x < size.x && s.position.y < size.y
+                });
             }
         }
     });
@@ -110,12 +116,22 @@ async fn main() {
         guard.screen = Vector2::new(d.get_screen_width() as f32, d.get_screen_height() as f32);
 
         for snowflake in guard.snowflakes.clone() {
-            d.draw_circle(snowflake.position.x as i32, snowflake.position.y as i32, snowflake.radius, Color::WHITE);
+            d.draw_circle(
+                snowflake.position.x as i32,
+                snowflake.position.y as i32,
+                snowflake.radius,
+                Color::WHITE,
+            );
         }
 
-        d.draw_fps(0,0);
-        d.draw_text(&format!("{} snowflakes", guard.snowflakes.len()), 00, 20, 20, Color::WHITE);
-
+        d.draw_fps(0, 0);
+        d.draw_text(
+            &format!("{} snowflakes", guard.snowflakes.len()),
+            00,
+            20,
+            20,
+            Color::WHITE,
+        );
     }
 
     std::process::exit(0);
